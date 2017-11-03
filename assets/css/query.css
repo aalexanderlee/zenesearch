@@ -1,0 +1,93 @@
+/*font-family: 'EB Garamond', serif;
+font-family: 'Yellowtail', cursive;
+font-family: 'Oswald', sans-serif;*/
+
+/* LIGHT: 	2175BA
+			0990C4
+BASE COLOR: 019BAD
+			005B54
+			93BAB0*/
+
+.panel-body {
+	background-color: white;
+	text-align: center;
+}
+
+
+#map{
+	height: 400px;
+	width: 100%;
+
+}
+
+.form-control {
+	margin-bottom: 20px;
+}
+
+#radius-answer {
+	margin-bottom: 10px;
+}
+
+body {
+	background: url("../images/noisy_grid/noisy_grid.png");
+}
+
+h1 {
+	font-size: 135px;
+	color: #019BAD;
+	font-family: 'Yellowtail', cursive;
+}
+
+h2 {
+	font-family: 'Oswald', sans-serif;
+	color: #93BAB0;
+	font-size: 30px;
+}
+
+#header-one {
+	padding: 20px;
+}
+
+h3 {
+	font-family: 'Oswald', sans-serif;
+	font-size: 20px;
+	color: #005B54;
+	margin: 5px;
+}
+
+th {
+	font-family: 'Oswald', sans-serif;
+	font-size: 20px;
+	color: #005B54;
+	margin: 5px;
+}
+
+h4 {
+	font-size: 25px;
+	font-family: 'Oswald', sans-serif;
+	color: #0990C4;
+}
+
+p{
+	font-size: 18px;
+	font-family: 'Oswald', sans-serif;
+	color: #0990C4;
+}
+
+.superShadow {
+	text-shadow:0 1px 0 hsl(174,5%,80%),
+                0 2px 0 hsl(174,5%,75%),
+                0 3px 0 hsl(174,5%,70%),
+                0 4px 0 hsl(174,5%,66%),
+                0 5px 0 hsl(174,5%,64%),
+                0 6px 0 hsl(174,5%,62%),
+                0 7px 0 hsl(174,5%,61%),
+                0 8px 0 hsl(174,5%,60%),
+
+				0 0 5px rgba(0,0,0,.05),
+                0 1px 3px rgba(0,0,0,.2),
+                0 3px 5px rgba(0,0,0,.2),
+            	0 5px 10px rgba(0,0,0,.2),
+            	0 10px 10px rgba(0,0,0,.2),
+            	0 20px 20px rgba(0,0,0,.3);
+}
