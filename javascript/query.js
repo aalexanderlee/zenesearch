@@ -40,12 +40,12 @@ function validateForm() {
     }
 }
 
-// Clear the map of previous map.
+// Clear the map of previous map between searches/refresh.
 function clearMapDiv(){
   $('#map').empty();
 }
 
-// This will help change the city to latitude/longitude values
+// Change the city and state user input to latitude/longitude values for request in initMap() and getData().
 function geoCoder() {
   var location = $("#city-input").val().trim();
   city = formatQueryString(location);
@@ -85,7 +85,7 @@ function initMap() {
         marker.addListener('click', function() {
           infowindow.open(map, marker);
         });
-        // Here you add the fields you require for request for PlacesService()
+        // Here, add the criteria you require for request returned from PlacesService() below.
         var request = {
           location: {lat:37.7749, lng:-122.4194},
           radius: $('input[type="radio"]:checked').val(),
@@ -93,34 +93,30 @@ function initMap() {
         };
         service = new google.maps.places.PlacesService(map);
         service.textSearch(request, callback);
-  });
-}
+  }); // Close snapshot retrieval function from Firebase database.
+} // Close initMap()
 
 
 function getData() {
   clearMapDiv();
   initMap();
   // These are our user inputs and search parameters
-  //var Arr = [];
   var yourTopic = $("#topic-input").val().trim();
   topic = formatQueryString(yourTopic) + "+";
   // console.log(topic);
-  //Arr.push(topic);
   var location = $("#city-input").val().trim();
   city = formatQueryString(location);
   // console.log(city);
-  //Arr.push(city);
   var state = $("#state-input").val().trim();
   state = "+" + formatQueryString(state);
   // console.log(state);
-  //Arr.push(state);
   var query = topic+city+state;
   console.log(query);
   var radius = $('input[type="radio"]:checked').val();
   console.log(radius);
 
   function produceSearch(query) {
-    //_params
+    // Set _params to be the request object for callback criteria.
     var request = {
         radius : radius,
         type : ['query'],
@@ -130,20 +126,17 @@ function getData() {
     var service = new google.maps.places.PlacesService(map); //map_inst
     service.textSearch(request, callback);
     console.log ("Request succeeded: " + callback);
-  }
+  } // Close produceSearch()
 } // Close getData()
 
 function callback(results, status) {
-  // results is "response"
+  // Let "results" be response placeholder.
   if (status == google.maps.places.PlacesServiceStatus.OK) {
     console.log(status)
-    // Limit results to prevent excessive iterations through response.results[i]
+    // Iterate through results from callback.
     for (var i=0; i<results.length; i++) {
       resultCounter++;
-      // var place = results[i];
-      // var photos = place.photos[i].html_attributions[i];
-      // var service = new google.maps.places.PlacesService(map); //map_inst
-      // service.createMarker(place);
+
       var tableHead = $("<th>");
       tableHead.attr("scope", "row");
       tableHead.attr("id", "result-"+resultCounter);
@@ -173,11 +166,10 @@ function callback(results, status) {
   }
 } // Close callback()
 
-
+// Concatenate spaces for query parameters if necessary. (i.e. san+francisco, etc.)
 function formatQueryString(str) {
     var finalString;
     var splitString = str.split(" ");
-    // If there was a space, concatenate it.
     if (splitString.length > 1) {
       finalString = splitString.join("+");
     }
@@ -187,12 +179,12 @@ function formatQueryString(str) {
     return finalString;
  }
 
-//Calls document functions
+// Calls document functions upon the submit button trigger.
 $(document).ready(function(){
   $(".panel-body").on("click", "#submit-button", {passive: true}, function(event) {
     event.preventDefault();
     //Automatically scroll down to search-results div
     $('html,body').animate({scrollTop: $("#search-results").offset().top}, 'slow');
     validateForm();
-  });// On click trigger.
-}); // Document on ready
+  });
+});
