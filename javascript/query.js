@@ -55,12 +55,12 @@ function initMap() {
   // Grab the last saved data from Firebase.
   database.ref().limitToLast(10).on("child_added", function(snapshot) {
     var sv = snapshot.val();
-        var center = {lat: parseFloat(sv.latitude), lng: parseFloat(sv.longitude)};
+        // var center = {lat: sv.latitude, lng: sv.longitude};
         var marker = new google.maps.Marker({
-          position: center,
+          position: {lat:37.7749, lng:-122.4194},
           map: map,
         });
-        map.panTo(center);
+        map.panTo({lat:37.7749, lng:-122.4194});
         var type = sv.type;
         var infowindow = new google.maps.InfoWindow({
           content: type
@@ -70,7 +70,7 @@ function initMap() {
         });
         //Here you add the fields you require for request for PlacesService()
         var request = {
-          location: center,
+          location: {lat:37.7749, lng:-122.4194},
           radius: $('input[type="radio"]:checked').val(),
           types: ['topic']
         };
@@ -114,7 +114,8 @@ function getData() {
 function callback(results, status) {
   // results is "response"
   if (status == google.maps.places.PlacesServiceStatus.OK) {
-    for (var i=0; i<results.length; i++) {
+    // Limit results to prevent excessive iterations through response.results[i]
+    for (var i=0; i<10; i++) {
       resultCounter++;
       // var place = results[i];
       // var photos = place.photos[i].html_attributions[i];
@@ -133,7 +134,7 @@ function callback(results, status) {
       var newSearch = {
         // photo_attributions: results[i].photos[i].html_attributions[i],
         type: results[i].name,
-        //rating: results[i].rating,
+        rating: results[i].rating,
         formatted_address: results[i].formatted_address,
         lat: results[i].geometry.location.lat,
         lng: results[i].geometry.location.lng,
