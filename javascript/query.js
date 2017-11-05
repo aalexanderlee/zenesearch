@@ -130,7 +130,7 @@ function getData() {
 } // Close getData()
 
 function callback(results, status) {
-  // Let "results" be response placeholder.
+
   if (status == google.maps.places.PlacesServiceStatus.OK) {
     console.log(status)
     // Iterate through results from callback.
@@ -144,15 +144,27 @@ function callback(results, status) {
       console.log(results);
       console.log(status);
 
+      // If API returns undefined, notify there is no rating.
+      var someRating = results[i].rating;
+      if (someRating === undefined) {
+        someRating = "Merrrp. No ratings here.";
+      }
+      // If API returns undefined, notify there is no price tier.
+      var pricing = results[i].price_level;
+      if (pricing === undefined) {
+        pricing = "Priceless.";
+      }
+      // Format name and address correctly for href link joining and searching for <a></a>.
+      var formatName = formatQueryString(results[i].name);
+      var formatAddress = formatQueryString(results[i].formatted_address);
       // <a href="'+addshit+'" target="_blank"><h2></h2> </a>
       // <a href="'+results.photos+'" target="_blank"><h2>'+results.place.name+'</h2></a>
       // document.getElementById("aaa").href
       $('#table > tbody')
-        .append('<tr>'+tableHead+resultCounter+'</th><td><a href="+results[i].photos[i].html_attributions[0]+" target="_blank"><h2>'+results[i].name+'</h2></a></td><td><h4>'+
-        results[i].rating+'</h4></td><td><p>'+results[i].formatted_address+'</p></td></tr>');
+        .append('<tr>'+tableHead+resultCounter+'</th><td><a href="https://www.google.com/maps?q='+formatName+'" target="_blank"><h2>'+results[i].name+'</h2></a></td><td><h4>'+someRating+'</h4></td><td><h4>'+pricing+'</h4></td><td><a href="https://www.google.com/maps?q='+formatAddress+'" target="_blank"><h4>'+results[i].formatted_address+'</h4></a></td></tr>');
 
       // var newSearch = {
-      //   photo_attributions: results[i].photos[i].html_attributions[0],
+      //   photo_attributions: results[i].photos[i].html_attributions[i],
       //   type: results[i].name,
       //   rating: results[i].rating,
       //   formatted_address: results[i].formatted_address,
@@ -162,7 +174,7 @@ function callback(results, status) {
       // };
     }
     //Push search results to Firebase
-    //database.ref().push(newSearch);
+    // database.ref().push(results);
   }
 } // Close callback()
 
