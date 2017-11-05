@@ -156,12 +156,12 @@ function callback(results, status) {
       }
       // Format name and address correctly for href link joining and searching for <a></a>.
       var formatName = formatQueryString(results[i].name);
-      var formatAddress = formatQueryString(results[i].formatted_address);
+      // var formatAddress = formatQueryString(results[i].formatted_address);
       // <a href="'+addshit+'" target="_blank"><h2></h2> </a>
       // <a href="'+results.photos+'" target="_blank"><h2>'+results.place.name+'</h2></a>
       // document.getElementById("aaa").href
       $('#table > tbody')
-        .append('<tr>'+tableHead+resultCounter+'</th><td><a href="https://www.google.com/maps?q='+formatName+'" target="_blank"><h2>'+results[i].name+'</h2></a></td><td><h4>'+someRating+'</h4></td><td><h4>'+pricing+'</h4></td><td><a href="https://www.google.com/maps?q='+formatAddress+'" target="_blank"><h4>'+results[i].formatted_address+'</h4></a></td></tr>');
+        .append('<tr>'+tableHead+resultCounter+'</th><td><a href="https://www.google.com/maps?q='+formatName+'" target="_blank"><h2>'+results[i].name+'</h2></a></td><td><h4>'+someRating+'</h4></td><td><h4>'+pricing+'</h4></td><td><a href="https://www.google.com/maps?q='+formatName+'" target="_blank"><h4>'+results[i].formatted_address+'</h4></a></td></tr>');
 
       // var newSearch = {
       //   photo_attributions: results[i].photos[i].html_attributions[i],
