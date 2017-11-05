@@ -55,15 +55,15 @@ function initMap() {
   // Grab the last saved data from Firebase.
   database.ref().limitToLast(10).on("child_added", function(snapshot) {
     var sv = snapshot.val();
-        var center = {lat: sv.latitude, lng: sv.longitude};
+        var center = {lat: parseFloat(sv.latitude), lng: parseFloat(sv.longitude)};
         var marker = new google.maps.Marker({
           position: center,
           map: map,
         });
         map.panTo(center);
-        var companies = sv.company;
+        var type = sv.type;
         var infowindow = new google.maps.InfoWindow({
-          content: companies
+          content: type
         })
         marker.addListener('click', function() {
           infowindow.open(map, marker);
@@ -81,6 +81,7 @@ function initMap() {
 
 
 function getData() {
+  clearMapDiv();
   initMap();
   // These are our user inputs and search parameters
   //var Arr = [];
@@ -93,27 +94,27 @@ function getData() {
   var state = $("#state-input").val().trim();
   state = formatQueryString(state);
   //Arr.push(state);
-  var searchTerm = topic+city+state;
+  var query = topic+city+state;
   var radius = $('input[type="radio"]:checked').val();
 
   function produceSearch(searchTerm) {
     //_params
     var request = {
         radius : radius,
-        type : ['searchTerm'],
-        location : app.modules.mapsProvider.getLatLng(position),
+        type : ['query'],
+        location : app.modules.mapsProvider.getLatLng({lat: parseFloat(sv.latitude), lng: parseFloat(sv.longitude)}),
         key : 'AIzaSyAEqiSu63n6-F2BKTTuF_CnvsTpyUsYiNM'
     };
     var service = new google.maps.places.PlacesService(map); //map_inst
     service.textSearch(request, callback);
-    console.log ("Request succeeded: " + callback);
+    console.log ("Request succeeded: " + request);
   }
 } // Close getData()
 
 function callback(results, status) {
   // results is "response"
   if (status == google.maps.places.PlacesServiceStatus.OK) {
-    for (var i=0; i<results.results[i].length; i++) {
+    for (var i=0; i<results.length; i++) {
       resultCounter++;
       // var place = results[i];
       // var photos = place.photos[i].html_attributions[i];
@@ -126,21 +127,21 @@ function callback(results, status) {
       // <a href="'+addshit+'" target="_blank"><h2></h2> </a>
       // <a href="'+results.photos+'" target="_blank"><h2>'+results.place.name+'</h2></a>
       $('#table > tbody')
-        .append('<tr>'+tableHead+resultCounter+'</th><td><h2>'+results.results[i].name+'</h2></td><td><h4>'+
-        results.results[i].rating+'</h4></td><td><p>'+results.results[i].formatted_address+'</p></td></tr>');
+        .append('<tr>'+tableHead+resultCounter+'</th><td><h2>'+results[i].name+'</h2></td><td><h4>'+
+        results[i].rating+'</h4></td><td><p>'+results[i].formatted_address+'</p></td></tr>');
 
       var newSearch = {
-        html_attributions: results.results[i].photos,
-        name: results.results[i].name,
-        rating: results.results[i].rating,
-        formatted_address: results.results[i].formatted_address,
-        latitude: results.results[i].geometry.location.lat,
-        longitude: results.results[i].geometry.location.lng,
+        // photo_attributions: results[i].photos[i].html_attributions[i],
+        type: results[i].name,
+        //rating: results[i].rating,
+        formatted_address: results[i].formatted_address,
+        lat: results[i].geometry.location.lat,
+        lng: results[i].geometry.location.lng,
         dateAdded: firebase.database.ServerValue.TIMESTAMP,
       };
-      //Push search results to Firebase
-      database.ref().push(newSearch);
     }
+    //Push search results to Firebase
+    database.ref().push(newSearch);
   }
 } // Close callback()
 
