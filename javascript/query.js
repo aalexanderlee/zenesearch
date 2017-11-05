@@ -45,16 +45,33 @@ function clearMapDiv(){
   $('#map').empty();
 }
 
+// This will help change the city to latitude/longitude values
+function geoCoder() {
+  var location = $("#city-input").val().trim();
+  city = formatQueryString(location);
+  var state = $("#state-input").val().trim();
+  state = formatQueryString(state);
+  // Grab the library for translating city to lat and lng.
+  var geocoder =  new google.maps.Geocoder();
+  geocoder.geocode( {'address': city + state}, function(results, status) {
+          if (status == google.maps.GeocoderStatus.OK) {
+            console.log("location : " + results[0].geometry.location.lat() + " " +results[0].geometry.location.lng());
+            var location = {lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}
+          }
+  });
+}
+
 // Initialize the map after the clearing previous version.
 function initMap() {
   clearMapDiv();
+  geoCoder();
   var yourTopic = $("#topic-input").val().trim();
-  topic = formatQueryString(yourTopic);
+  topic = formatQueryString(yourTopic) + "+";
   // Center the new map in San Francisco proper.
   var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center:{lat:37.7749, lng:-122.4194}});
   // Grab the last saved data from Firebase.
   database.ref().limitToLast(10).on("child_added", function(snapshot) {
-    var sv = snapshot.val();
+        var sv = snapshot.val();
         // var center = {lat: sv.latitude, lng: sv.longitude};
         var marker = new google.maps.Marker({
           position: {lat:37.7749, lng:-122.4194},
@@ -68,7 +85,7 @@ function initMap() {
         marker.addListener('click', function() {
           infowindow.open(map, marker);
         });
-        //Here you add the fields you require for request for PlacesService()
+        // Here you add the fields you require for request for PlacesService()
         var request = {
           location: {lat:37.7749, lng:-122.4194},
           radius: $('input[type="radio"]:checked').val(),
@@ -86,18 +103,23 @@ function getData() {
   // These are our user inputs and search parameters
   //var Arr = [];
   var yourTopic = $("#topic-input").val().trim();
-  topic = formatQueryString(yourTopic);
+  topic = formatQueryString(yourTopic) + "+";
+  // console.log(topic);
   //Arr.push(topic);
   var location = $("#city-input").val().trim();
   city = formatQueryString(location);
+  // console.log(city);
   //Arr.push(city);
   var state = $("#state-input").val().trim();
-  state = formatQueryString(state);
+  state = "+" + formatQueryString(state);
+  // console.log(state);
   //Arr.push(state);
   var query = topic+city+state;
+  console.log(query);
   var radius = $('input[type="radio"]:checked').val();
+  console.log(radius);
 
-  function produceSearch(searchTerm) {
+  function produceSearch(query) {
     //_params
     var request = {
         radius : radius,
@@ -107,15 +129,16 @@ function getData() {
     };
     var service = new google.maps.places.PlacesService(map); //map_inst
     service.textSearch(request, callback);
-    console.log ("Request succeeded: " + request);
+    console.log ("Request succeeded: " + callback);
   }
 } // Close getData()
 
 function callback(results, status) {
   // results is "response"
   if (status == google.maps.places.PlacesServiceStatus.OK) {
+    console.log(status)
     // Limit results to prevent excessive iterations through response.results[i]
-    for (var i=0; i<10; i++) {
+    for (var i=0; i<results.length; i++) {
       resultCounter++;
       // var place = results[i];
       // var photos = place.photos[i].html_attributions[i];
@@ -124,25 +147,29 @@ function callback(results, status) {
       var tableHead = $("<th>");
       tableHead.attr("scope", "row");
       tableHead.attr("id", "result-"+resultCounter);
+      console.log(resultCounter);
+      console.log(results);
+      console.log(status);
 
       // <a href="'+addshit+'" target="_blank"><h2></h2> </a>
       // <a href="'+results.photos+'" target="_blank"><h2>'+results.place.name+'</h2></a>
+      // document.getElementById("aaa").href
       $('#table > tbody')
-        .append('<tr>'+tableHead+resultCounter+'</th><td><h2>'+results[i].name+'</h2></td><td><h4>'+
+        .append('<tr>'+tableHead+resultCounter+'</th><td><a href="+results[i].photos[i].html_attributions[0]+" target="_blank"><h2>'+results[i].name+'</h2></a></td><td><h4>'+
         results[i].rating+'</h4></td><td><p>'+results[i].formatted_address+'</p></td></tr>');
 
-      var newSearch = {
-        // photo_attributions: results[i].photos[i].html_attributions[i],
-        type: results[i].name,
-        rating: results[i].rating,
-        formatted_address: results[i].formatted_address,
-        lat: results[i].geometry.location.lat,
-        lng: results[i].geometry.location.lng,
-        dateAdded: firebase.database.ServerValue.TIMESTAMP,
-      };
+      // var newSearch = {
+      //   photo_attributions: results[i].photos[i].html_attributions[0],
+      //   type: results[i].name,
+      //   rating: results[i].rating,
+      //   formatted_address: results[i].formatted_address,
+      //   lat: results[i].geometry.location.lat,
+      //   lng: results[i].geometry.location.lng,
+      //   dateAdded: firebase.database.ServerValue.TIMESTAMP,
+      // };
     }
     //Push search results to Firebase
-    database.ref().push(newSearch);
+    //database.ref().push(newSearch);
   }
 } // Close callback()
 
