@@ -74,6 +74,13 @@ p{
 	color: #0990C4;
 }
 
+footer{
+	font-size: 18px;
+	font-family: 'Oswald', sans-serif;
+	color: #0990C4;
+	text-align: center;
+}
+
 .superShadow {
 	text-shadow:0 1px 0 hsl(174,5%,80%),
                 0 2px 0 hsl(174,5%,75%),
