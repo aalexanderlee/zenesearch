@@ -45,26 +45,10 @@ function clearMapDiv(){
   $('#map').empty();
 }
 
-// Change the city and state user input to latitude/longitude values for request in initMap() and getData().
-function geoCoder() {
-  var location = $("#city-input").val().trim();
-  city = formatQueryString(location);
-  var state = $("#state-input").val().trim();
-  state = formatQueryString(state);
-  // Grab the library for translating city to lat and lng.
-  var geocoder =  new google.maps.Geocoder();
-  geocoder.geocode( {'address': city + state}, function(results, status) {
-          if (status == google.maps.GeocoderStatus.OK) {
-            console.log("location : " + results[0].geometry.location.lat() + " " +results[0].geometry.location.lng());
-            var location = {lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}
-          }
-  });
-}
-
 // Initialize the map after the clearing previous version.
 function initMap() {
   clearMapDiv();
-  geoCoder();
+  // geoCoder();
   var yourTopic = $("#topic-input").val().trim();
   topic = formatQueryString(yourTopic) + "+";
   // Center the new map in San Francisco proper.
@@ -96,10 +80,26 @@ function initMap() {
   }); // Close snapshot retrieval function from Firebase database.
 } // Close initMap()
 
+// Change the city and state user input to latitude/longitude values for request in initMap() and getData().
+function geoCoder() {
+  var location = $("#city-input").val().trim();
+  city = formatQueryString(location);
+  var state = $("#state-input").val().trim();
+  state = formatQueryString(state);
+  // Grab the library for translating city to lat and lng.
+  var geocoder =  new google.maps.Geocoder();
+  geocoder.geocode( {'address': city + state}, function(results, status) {
+          if (status == google.maps.GeocoderStatus.OK) {
+            console.log("location : " + results[0].geometry.location.lat() + " " +results[0].geometry.location.lng());
+            var location = {lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}
+          }
+  });
+}
 
 function getData() {
   clearMapDiv();
   initMap();
+  geoCoder();
   // These are our user inputs and search parameters
   var yourTopic = $("#topic-input").val().trim();
   topic = formatQueryString(yourTopic) + "+";
@@ -117,10 +117,12 @@ function getData() {
 
   function produceSearch(query) {
     // Set _params to be the request object for callback criteria.
+    // Change location from Firebase in initMap() => {lat: parseFloat(sv.latitude), lng: parseFloat(sv.longitude)}
+    // Set the location from geoCoder() => {lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}
     var request = {
         radius : radius,
         type : ['query'],
-        location : app.modules.mapsProvider.getLatLng({lat: parseFloat(sv.latitude), lng: parseFloat(sv.longitude)}),
+        location : app.modules.mapsProvider.getLatLng({lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}),
         key : 'AIzaSyAEqiSu63n6-F2BKTTuF_CnvsTpyUsYiNM'
     };
     var service = new google.maps.places.PlacesService(map); //map_inst
