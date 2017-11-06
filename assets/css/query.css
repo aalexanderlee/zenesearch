@@ -78,7 +78,8 @@ footer{
 	font-size: 18px;
 	font-family: 'Oswald', sans-serif;
 	color: #0990C4;
-	text-align: right;
+	padding-left: 50%;
+	text-align: center;
 }
 
 .superShadow {
