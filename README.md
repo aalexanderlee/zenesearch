@@ -3,7 +3,7 @@
 ZeneSearch => is a basic query search engine web application that allows users to search by parameters and preferences for nearby places, services and landmarks most relevant to the topic search in correlation to distance specifications.
 
 ## Here is a quick demo of ZeneSearch:
-![alt text](./assets/images/zsearch_demo.mov)
+![alt text](./assets/images/zsearch.gif)
 
 ## Here is the Github deployment link:
 https://aalexanderlee.github.io/zenesearch/
@@ -21,4 +21,4 @@ Google GeoCoder, Places and Maps API services were use to translate place proxim
 ## Worth Noting & Issues Faced:
 The Google API platform does not support any typically conventional methods for data requests, responses and/or callback methods using $.ajax, CORS, or axios. It is also incompatible with any external package.json add-ons that would otherwise help access other API databases. Foundational functions must be used from documentations then added within correct scopes and formatting to fit the apps specific request needs and callback requirements to run optimally.
 
-#Happy ZeneSearching!
+# Happy ZeneSearching!
