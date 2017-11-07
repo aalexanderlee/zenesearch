@@ -18,9 +18,13 @@ var database = firebase.database();
 var tl = new TimelineMax({repeat:600000, repeatDelay:1, yoyo:true});
 tl.staggerTo("h1,h2", 0.2, {className:"+=superShadow", top:"-=10px", ease:Power1.easeIn}, "0.3", "start")
 
+window.onload = function() {
+      initMap({lat:37.7749, lng:-122.4194});
+}
+
 // This function will distinguish input errors and notify.
 function validateForm() {
-    // Clear the search-results div.
+    // Clear before use.
     $('#table > tbody').empty();
     // Set values from input boxes to variables.
     var x = $('#topic-input').val().trim();
@@ -29,7 +33,7 @@ function validateForm() {
     console.log("y", y);
     var z = $('#state-input').val().trim();
     console.log("z", z);
-    // Check to confirm they were filled out.
+    // Confirm everything is filled out.
     if (x == "" || y == "" || z == "")  {
       $("#search-results").append('<div id="error"> Please fill out the appropriate sections. </div>');
     }
@@ -46,60 +50,95 @@ function clearMapDiv(){
 }
 
 // Initialize the map after the clearing previous version.
-function initMap() {
+function initMap(location) {
   clearMapDiv();
-  // geoCoder();
   var yourTopic = $("#topic-input").val().trim();
   topic = formatQueryString(yourTopic) + "+";
-  // Center the new map in San Francisco proper.
-  var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center:{lat:37.7749, lng:-122.4194}});
-  // Grab the last saved data from Firebase.
-  database.ref().limitToLast(10).on("child_added", function(snapshot) {
-        var sv = snapshot.val();
+  // Uncomment to grab the last saved data from Firebase.
+  // database.ref().limitToLast(10).on("child_added", function(snapshot) {
+  //       var sv = snapshot.val();
+        // Center the initial map to San Francisco proper.
+        var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center:{lat:37.7749, lng:-122.4194}});
+        map.panTo({lat:37.7749, lng:-122.4194}); // map.panTo(center);
         // var center = {lat: sv.latitude, lng: sv.longitude};
         var marker = new google.maps.Marker({
           position: {lat:37.7749, lng:-122.4194},
           map: map,
         });
-        map.panTo({lat:37.7749, lng:-122.4194});
-        var type = sv.type;
+        // var type = sv.type;
         var infowindow = new google.maps.InfoWindow({
-          content: type
+          content: "Wurrr u atz?!"
         })
         marker.addListener('click', function() {
           infowindow.open(map, marker);
         });
         // Here, add the criteria you require for request returned from PlacesService() below.
-        var request = {
-          location: {lat:37.7749, lng:-122.4194},
-          radius: $('input[type="radio"]:checked').val(),
-          types: ['topic']
-        };
-        service = new google.maps.places.PlacesService(map);
-        service.textSearch(request, callback);
-  }); // Close snapshot retrieval function from Firebase database.
+        // var request = {
+        //   location: {lat:37.7749, lng:-122.4194},
+        //   radius: $('input[type="radio"]:checked').val(),
+        //   query: topic
+        // };
+        // service = new google.maps.places.PlacesService(map);
+        // service.textSearch(request, callback);
+  // }); // Close snapshot retrieval function from Firebase database.
 } // Close initMap()
 
 // Change the city and state user input to latitude/longitude values for request in initMap() and getData().
 function geoCoder() {
+  var radius = $('input[type="radio"]:checked').val();
+
+  var yourTopic = $("#topic-input").val().trim();
+  topic = formatQueryString(yourTopic) + "+";
+
   var location = $("#city-input").val().trim();
   city = formatQueryString(location);
   var state = $("#state-input").val().trim();
   state = formatQueryString(state);
+
+  var query = topic+city+state;
   // Grab the library for translating city to lat and lng.
   var geocoder =  new google.maps.Geocoder();
   geocoder.geocode( {'address': city + state}, function(results, status) {
           if (status == google.maps.GeocoderStatus.OK) {
             console.log("location : " + results[0].geometry.location.lat() + " " +results[0].geometry.location.lng());
-            var location = {lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}
+            var location = {lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()};
+            initMap({lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()});
+
+            // Generate the map for new location from user input
+            var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center:{lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}});
+            map.panTo({lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}); // map.panTo(center);
+            var marker = new google.maps.Marker({
+              position: {lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}, //{lat: sv.latitude, lng: sv.longitude},
+              map: map,
+            });
+            var infowindow = new google.maps.InfoWindow({
+              content: "Current location."
+            })
+            marker.addListener('click', function() {
+              infowindow.open(map, marker);
+            });
+
+
+            var request = {
+                radius : radius,
+                location : {lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()},
+                query : query,
+                key : 'AIzaSyAEqiSu63n6-F2BKTTuF_CnvsTpyUsYiNM'
+            };
+            var service = new google.maps.places.PlacesService(map); //map_inst
+            service.textSearch(request, callback);
+            console.log ("Request succeeded: " + callback);
+
+
           }
   });
 }
 
 function getData() {
   clearMapDiv();
-  initMap();
   geoCoder();
+  // initMap();
+  function produceSearch(query) {
   // These are our user inputs and search parameters
   var yourTopic = $("#topic-input").val().trim();
   topic = formatQueryString(yourTopic) + "+";
@@ -114,25 +153,30 @@ function getData() {
   console.log(query);
   var radius = $('input[type="radio"]:checked').val();
   console.log(radius);
-
-  function produceSearch(query) {
     // Set _params to be the request object for callback criteria.
     // Change location from Firebase in initMap() => {lat: parseFloat(sv.latitude), lng: parseFloat(sv.longitude)}
     // Set the location from geoCoder() => {lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}
-    var request = {
-        radius : radius,
-        type : ['query'],
-        location : app.modules.mapsProvider.getLatLng({lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}),
-        key : 'AIzaSyAEqiSu63n6-F2BKTTuF_CnvsTpyUsYiNM'
-    };
-    var service = new google.maps.places.PlacesService(map); //map_inst
-    service.textSearch(request, callback);
-    console.log ("Request succeeded: " + callback);
+    // var request = {
+    //     radius : radius,
+    //     location : app.modules.mapsProvider.getLatLng({lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}),
+    //     query : query,
+    //     key : 'AIzaSyAEqiSu63n6-F2BKTTuF_CnvsTpyUsYiNM'
+    // };
+    // var service = new google.maps.places.PlacesService(map); //map_inst
+    // service.textSearch(request, callback);
+    // console.log ("Request succeeded: " + callback);
+
+    // var request = {
+    //   location: {lat:37.7749, lng:-122.4194},
+    //   radius: $('input[type="radio"]:checked').val(),
+    //   query: topic
+    // };
+    // service = new google.maps.places.PlacesService(map);
+    // service.textSearch(request, callback);
   } // Close produceSearch()
 } // Close getData()
 
 function callback(results, status) {
-
   if (status == google.maps.places.PlacesServiceStatus.OK) {
     console.log(status)
     // Iterate through results from callback.
@@ -165,18 +209,18 @@ function callback(results, status) {
       $('#table > tbody')
         .append('<tr>'+tableHead+resultCounter+'</th><td><a href="https://www.google.com/maps?q='+formatName+'" target="_blank"><h2>'+results[i].name+'</h2></a></td><td><h4>'+someRating+'</h4></td><td><h4>'+pricing+'</h4></td><td><a href="https://www.google.com/maps?q='+formatName+'" target="_blank"><h4>'+results[i].formatted_address+'</h4></a></td></tr>');
 
-      // var newSearch = {
-      //   photo_attributions: results[i].photos[i].html_attributions[i],
-      //   type: results[i].name,
-      //   rating: results[i].rating,
-      //   formatted_address: results[i].formatted_address,
-      //   lat: results[i].geometry.location.lat,
-      //   lng: results[i].geometry.location.lng,
-      //   dateAdded: firebase.database.ServerValue.TIMESTAMP,
-      // };
+      var newSearch = {
+        name: formatName,
+        rating: someRating,
+        pricing_level: pricing,
+        formatted_address: results[i].formatted_address,
+        // lat: results[i].geometry.location.lat,
+        // lng: results[i].geometry.location.lng,
+        dateAdded: firebase.database.ServerValue.TIMESTAMP,
+      };
     }
     //Push search results to Firebase
-    // database.ref().push(results);
+    database.ref().push(newSearch);
   }
 } // Close callback()
 
