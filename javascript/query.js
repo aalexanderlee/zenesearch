@@ -105,7 +105,8 @@ function geoCoder() {
 
   var query = topic + "+" + city + "+" + state;
   console.log("Query: ", query);
-  // Grab the library for translating city to lat and lng.
+
+  // Grab the library for relating city name to lat and lng pairings.
   var geocoder =  new google.maps.Geocoder();
   geocoder.geocode( {'address': query}, function(results, status) {
     for (var i = 0; i < results.length; i++) {
@@ -118,7 +119,7 @@ function geoCoder() {
             var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center:{lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}});
             map.panTo({lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}); // map.panTo(center);
 
-            // Get the data using the location, query, and radius acquired.
+            // Get the names and addresses using the location, query, and radius acquired.
             var request = {
                 radius : radius,
                 location : {lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()},
@@ -129,25 +130,11 @@ function geoCoder() {
             var service = new google.maps.places.PlacesService(map); //map_inst
             service.textSearch(request, callback);
             console.log ("Request succeeded: " + callback);
-
-            var marker = new google.maps.Marker({
-              position: {lat: results[i].geometry.location.lat(), lng: results[i].geometry.location.lng()}, //{lat: sv.latitude, lng: sv.longitude},
-              map: map,
-            });
-            // markerArray.push(marker);
-
-            var infowindow = new google.maps.InfoWindow({
-              content: '<a href="https://www.google.com/maps?q='+results[i].formatted_address+'" target="_blank"><p>'
-              +results[i].formatted_address+'</p></a>'
-            })
-            marker.addListener('click', function() {
-              infowindow.open(map, marker);
-            });
+            // Previous location of createMarker().
       }
     }
   });
 }
-
 
 
 function callback(results, status) {
@@ -155,25 +142,25 @@ function callback(results, status) {
     console.log(status)
     // Iterate through results from callback.
     for (var i=0; i<results.length; i++) {
+      // geoCoder();
       resultCounter++;
 
+// This is createMarker(), using results[i] from callback().
+      var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center:{lat: results[i].geometry.location.lat(), lng: results[i].geometry.location.lng()}});
+      map.panTo({lat: results[i].geometry.location.lat(), lng: results[i].geometry.location.lng()}); // map.panTo(center);
 
-
-      // marker = new google.maps.Marker({
-      //   position: {lat: results[i].geometry.location.lat(), lng: results[i].geometry.location.lng()}, //{lat: sv.latitude, lng: sv.longitude},
-      //   map: map,
-      // });
+      var marker = new google.maps.Marker({
+        position: {lat: results[i].geometry.location.lat(), lng: results[i].geometry.location.lng()}, //{lat: sv.latitude, lng: sv.longitude},
+        map: map,
+      });
       // markerArray.push(marker);
-      //
-      // var infowindow = new google.maps.InfoWindow({
-      //   content: '<a href="https://www.google.com/maps?q='+results[i].formatted_address+'" target="_blank"><p>'
-      //   +results[i].formatted_address+'</p></a>'
-      // })
-      // marker.addListener('click', function() {
-      //   infowindow.open(map, marker);
-      // });
-
-
+      var infowindow = new google.maps.InfoWindow({
+        content: '<a href="https://www.google.com/maps?q='+results[i].formatted_address+'" target="_blank"><p>'
+        +results[i].formatted_address+'</p></a>'
+      })
+      marker.addListener('click', function() {
+        infowindow.open(map, marker);
+      });
 
       // Append table structure.
       var tableHead = $("<th>");
@@ -219,6 +206,24 @@ function callback(results, status) {
     database.ref().push(newSearch);
   }
 } // Close callback()
+
+// Definition of createMaker with unique data requests.
+// function createMarker() {
+//   for (var i = 0; i<results.length; i++) {
+//     var marker = new google.maps.Marker({
+//       position: {lat: results[i].geometry.location.lat(), lng: results[i].geometry.location.lng()}, //{lat: sv.latitude, lng: sv.longitude},
+//       map: map,
+//     });
+//     // markerArray.push(marker);
+//     var infowindow = new google.maps.InfoWindow({
+//       content: '<a href="https://www.google.com/maps?q='+results[i].formatted_address+'" target="_blank"><p>'
+//       +results[i].formatted_address+'</p></a>'
+//     })
+//     marker.addListener('click', function() {
+//       infowindow.open(map, marker);
+//     });
+//   }
+// }
 
 
 function getData() {
