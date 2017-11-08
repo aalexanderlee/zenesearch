@@ -209,6 +209,8 @@ function callback(results, status) {
         name: formatName,
         rating: someRating,
         pricing_level: pricing,
+        latitude: results[i].geometry.location.lat(),
+        longitude: results[i].geometry.location.lng(),
         formatted_address: results[i].formatted_address,
         dateAdded: firebase.database.ServerValue.TIMESTAMP,
       };
