@@ -11,7 +11,7 @@ firebase.initializeApp(config);
 // Initialize result counter as the returned data entry IDs
 var resultCounter = 0;
 var map;
-var markers = [];
+var markerArray = [];
 var database = firebase.database();
 
 // The Green Sock library supplies the header's motion effect.
@@ -64,20 +64,21 @@ window.onload = function() {
 // Initialize the map after the clearing previous version.
 function initMap(location) {
   clearMapDiv();
-  // Uncomment below segment if you want to grab the last 10 saved data-sets from Firebase.
+  // Uncomment segment below if you want to grab the last 10 saved data-sets from Firebase.
   // database.ref().limitToLast(10).on("child_added", function(snapshot) {
-  //       var sv = snapshot.val();
+        // var sv = snapshot.val();
         // Center the initial map to San Francisco proper.
         var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center:{lat:37.7749, lng:-122.4194}});
         map.panTo({lat:37.7749, lng:-122.4194}); // map.panTo(center);
-        // var center = {lat: sv.latitude, lng: sv.longitude}; // Most recent Firebase lat & lng pairing.
+        // var center = {lat: sv.latitude, lng: sv.longitude}; // Uncomment to get recent Firebase lat & lng pairing.
         var marker = new google.maps.Marker({
           position: {lat:37.7749, lng:-122.4194},
           map: map,
         });
         // var type = sv.type;
+        var frisco = "Home: San Francisco, CA";
         var infowindow = new google.maps.InfoWindow({
-          content: "Wurrr u atz?!"
+          content: '<a href="https://www.google.com/maps/place/San+Francisco+CA/" target="_blank"><p>'+frisco+'</p></a>'
         })
         marker.addListener('click', function() {
           infowindow.open(map, marker);
@@ -102,10 +103,12 @@ function geoCoder() {
   state = formatQueryString(state);
   console.log("State/Province: ", state);
 
-  var query = topic+city+state;
+  var query = topic + "+" + city + "+" + state;
+  console.log("Query: ", query);
   // Grab the library for translating city to lat and lng.
   var geocoder =  new google.maps.Geocoder();
-  geocoder.geocode( {'address': city + state}, function(results, status) {
+  geocoder.geocode( {'address': query}, function(results, status) {
+    for (var i = 0; i < results.length; i++) {
       if (status == google.maps.GeocoderStatus.OK) {
             console.log("location : " + results[0].geometry.location.lat() + " " +results[0].geometry.location.lng());
             var location = {lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()};
@@ -115,58 +118,36 @@ function geoCoder() {
             var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center:{lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}});
             map.panTo({lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}); // map.panTo(center);
 
-            // for (var i = 0; i < results.length; i++) {
-            //
-            // var marker = new google.maps.Marker({
-            //   position: {lat: results[i].geometry.location.lat(), lng: results[i].geometry.location.lng()}, //{lat: sv.latitude, lng: sv.longitude},
-            //   map: map,
-            // });
-            // var infowindow = new google.maps.InfoWindow({
-            //   content: results[i].formatted_address
-            // })
-            // marker.addListener('click', function() {
-            //   infowindow.open(map, marker);
-            // });
-            //
-            // }
-
-            // Substitute this request in for possible produceSearch() in getData().
+            // Get the data using the location, query, and radius acquired.
             var request = {
                 radius : radius,
                 location : {lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()},
                 query : query,
                 key : 'AIzaSyAEqiSu63n6-F2BKTTuF_CnvsTpyUsYiNM'
             };
+
             var service = new google.maps.places.PlacesService(map); //map_inst
             service.textSearch(request, callback);
             console.log ("Request succeeded: " + callback);
-
-            for (var i = 0; i < results.length; i++) {
 
             var marker = new google.maps.Marker({
               position: {lat: results[i].geometry.location.lat(), lng: results[i].geometry.location.lng()}, //{lat: sv.latitude, lng: sv.longitude},
               map: map,
             });
+            // markerArray.push(marker);
+
             var infowindow = new google.maps.InfoWindow({
-              content: results[i].formatted_address
+              content: '<a href="https://www.google.com/maps?q='+results[i].formatted_address+'" target="_blank"><p>'
+              +results[i].formatted_address+'</p></a>'
             })
             marker.addListener('click', function() {
               infowindow.open(map, marker);
             });
-
-            }
-
-
-
       }
+    }
   });
 }
 
-
-function getData() {
-  clearMapDiv();
-  geoCoder();
-} // Close getData()
 
 
 function callback(results, status) {
@@ -175,6 +156,25 @@ function callback(results, status) {
     // Iterate through results from callback.
     for (var i=0; i<results.length; i++) {
       resultCounter++;
+
+
+
+      // marker = new google.maps.Marker({
+      //   position: {lat: results[i].geometry.location.lat(), lng: results[i].geometry.location.lng()}, //{lat: sv.latitude, lng: sv.longitude},
+      //   map: map,
+      // });
+      // markerArray.push(marker);
+      //
+      // var infowindow = new google.maps.InfoWindow({
+      //   content: '<a href="https://www.google.com/maps?q='+results[i].formatted_address+'" target="_blank"><p>'
+      //   +results[i].formatted_address+'</p></a>'
+      // })
+      // marker.addListener('click', function() {
+      //   infowindow.open(map, marker);
+      // });
+
+
+
       // Append table structure.
       var tableHead = $("<th>");
       tableHead.attr("scope", "row");
@@ -217,6 +217,14 @@ function callback(results, status) {
     database.ref().push(newSearch);
   }
 } // Close callback()
+
+
+function getData() {
+  clearMapDiv();
+  geoCoder();
+  callback();
+} // Close getData()
+
 
 // Calls document functions upon the submit button trigger.
 $(document).ready(function(){
