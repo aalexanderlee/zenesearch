@@ -12,6 +12,8 @@ firebase.initializeApp(config);
 // Initialize result counter as the returned data entry IDs
 var resultCounter = 0;
 var map;
+var marker = null;
+var markerArr = [];
 var database = firebase.database();
 
 // The Green Sock library supplies the header's motion effect.
@@ -72,7 +74,7 @@ function initMap(location) {
         // Create marker for Tokyo center.
         var marker = new google.maps.Marker({
           position: tokyo,
-          map: map,
+          map: map
         });
         var arigato = "Home: Tokyo, JP";
         var infowindow = new google.maps.InfoWindow({
@@ -139,26 +141,30 @@ function callback(results, status) {
   if (status == google.maps.places.PlacesServiceStatus.OK) {
     console.log(status);
     // Iterate through results from callback.
-    for (var i=0; i<results.length; i++) {
+    for (var i=0; i < results.length; i++) {
       console.log("THIS IS A RESULT: ", results);
-      var resGeo = {lat: results[i].geometry.location.lat(), lng: results[i].geometry.location.lng()}
+      var resGeo = {lat: results[i].geometry.location.lat(), lng: results[i].geometry.location.lng()};
+      markerArr.push(resGeo);
       resultCounter++;
-      // Create marker.
+      // createMarkers();
+
+      //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
       var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center: resGeo});
+      // var latLng = new google.maps.LatLng(results[i].geometry.location.lat(), results[i].geometry.location.lng());
       map.panTo(resGeo);
 
       var marker = new google.maps.Marker({
-        position: resGeo,
+        position:{lat: results[i].geometry.location.lat(), lng: results[i].geometry.location.lng()}, //results[0].geometry.location,
         map: map,
       });
-
+      // map.addTo(marker);
       var infowindow = new google.maps.InfoWindow({
-        content: '<a href="https://www.google.com/maps?q='+results[i].formatted_address+'" target="_blank"><p>'
-        +results[i].name+'</p></a>'
-      })
-      marker.addListener('click', function() {
-        infowindow.open(map, marker);
+        content: '<a href="https://www.google.com/maps?q='+results[i].formatted_address+'" target="_blank"><p>'+results[i].name+'</p></a>'
       });
+      marker.addListener('click', function() {
+        infowindow.open(map, this);
+      });
+      //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
       // Append table.
       var tableHead = $("<th>");
@@ -197,14 +203,36 @@ function callback(results, status) {
         formatted_address: results[i].formatted_address,
         dateAdded: firebase.database.ServerValue.TIMESTAMP,
       };
-    }//for loop
+    }//For loop
     //Push search results to Firebase
     database.ref().push(newData);
   } //if statement
-  // accessFirebase();
+    // accessFirebase();
 } // Close callback()
 
-// Grab all the iterations out from Firebase to the last 10 objects.
+// function createMarkers() {
+//   for (var i=0; i<markerArr.length; i++) {
+//     var newMarker = markerArr[i];
+//     var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center: newMarker});
+//     map.panTo(newMarker);
+//
+//     var marker = new google.maps.Marker({
+//       position: newMarker,//results[0].geometry.location,
+//       map: map,
+//     });
+//
+//     var infowindow = new google.maps.InfoWindow({
+//       content: "Destination." //'<a href="https://www.google.com/maps?q='+newMarker+'" target="_blank"><p>'+results[i].name+'</p></a>'
+//     });
+//     marker.addListener('click', function() {
+//       // infowindow.setContent(this.html);
+//       infowindow.open(map, this);
+//     });
+//   }
+//   console.log("This is all your crap: ", markerArr);
+// }
+
+// // Grab all the iterations out from Firebase to the last 10 objects.
 // function accessFirebase() {
 //   database.ref().limitToLast(10).on("child_added", function(snapshot) {
 //     // Signify database name.
@@ -220,9 +248,7 @@ function callback(results, status) {
 //     });
 //     map.panTo(center);
 //     var name = sv.name;
-//     var infowindow = new google.maps.Infowindow({
-//       content: sv.name
-//     })
+//     var infowindow = new google.maps.InfoWindow({content: name})
 //     marker.addListener('click', function() {
 //       infowindow.open(marker.get(map), marker);
 //     })
