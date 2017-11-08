@@ -8,10 +8,10 @@ var config = {
     messagingSenderId: "391059269856"
 };
 firebase.initializeApp(config);
+
 // Initialize result counter as the returned data entry IDs
 var resultCounter = 0;
 var map;
-var markerArr = [];
 var database = firebase.database();
 
 // The Green Sock library supplies the header's motion effect.
@@ -57,36 +57,33 @@ function clearMapDiv(){
   $('#map').empty();
 }
 
+// Tokyo map loads first.
 window.onload = function() {
-      initMap({lat:37.7749, lng:-122.4194});
+      initMap({lat:35.6895, lng:139.6917});
 }
 
 // Initialize the map after the clearing previous version.
 function initMap(location) {
   clearMapDiv();
-  // Uncomment segment below if you want to grab the last 10 saved data-sets from Firebase.
-  // database.ref().limitToLast(10).on("child_added", function(snapshot) {
-        // var sv = snapshot.val();
-        // Center the initial map to San Francisco proper.
-        var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center:{lat:37.7749, lng:-122.4194}});
-        map.panTo({lat:37.7749, lng:-122.4194}); // map.panTo(center);
-        // var center = {lat: sv.latitude, lng: sv.longitude}; // Uncomment to get recent Firebase lat & lng pairing.
+        // Center the initial map at Tokyo, Japan.
+        var tokyo = {lat:35.6895, lng:139.6917}
+        var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center: tokyo});
+        map.panTo(tokyo);
+        // Create marker for Tokyo center.
         var marker = new google.maps.Marker({
-          position: {lat:37.7749, lng:-122.4194},
+          position: tokyo,
           map: map,
         });
-        // var type = sv.type;
-        var frisco = "Home: San Francisco, CA";
+        var arigato = "Home: Tokyo, JP";
         var infowindow = new google.maps.InfoWindow({
-          content: '<a href="https://www.google.com/maps/place/San+Francisco+CA/" target="_blank"><p>'+frisco+'</p></a>'
+          content: '<a href="https://www.google.com/maps/place/tokyo+japan/" target="_blank"><p>'+arigato+'</p></a>'
         })
         marker.addListener('click', function() {
           infowindow.open(map, marker);
         });
-  // }); // Close snapshot retrieval function from Firebase database.
 } // Close initMap()
 
-// Change the city and state user input to latitude/longitude values for request in initMap() and getData().
+// Change user input to {lat,lng} values for request in initMap() and getData().
 function geoCoder() {
   var radius = $('input[type="radio"]:checked').val();
   console.log("Radius: ", radius);
@@ -106,59 +103,55 @@ function geoCoder() {
   var query = topic + "+" + city + "+" + state;
   console.log("Query: ", query);
 
-  // Grab the library for relating city name to lat and lng pairings.
+  // Grab the library for relating city name to latitude and longitude pairing.
   var geocoder =  new google.maps.Geocoder();
   geocoder.geocode( {'address': query}, function(results, status) {
     for (var i = 0; i < results.length; i++) {
       if (status == google.maps.GeocoderStatus.OK) {
-            console.log("location : " + results[0].geometry.location.lat() + " " +results[0].geometry.location.lng());
-            var location = {lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()};
-            initMap({lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()});
+            var userLocation = {lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()};
+            console.log("Location : ", userLocation);
+            var location = userLocation;
+            initMap(location);
 
             // Generate the map for new location from user input
-            var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center:{lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}});
-            map.panTo({lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()}); // map.panTo(center);
+            var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center: location});
+            map.panTo(location);
 
             // Get the names and addresses using the location, query, and radius acquired.
             var request = {
                 radius : radius,
-                location : {lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()},
+                location : location,
                 query : query,
                 key : 'AIzaSyAEqiSu63n6-F2BKTTuF_CnvsTpyUsYiNM'
             };
 
-            var service = new google.maps.places.PlacesService(map); //map_inst
+            // Inject request object to textSearch() for callback() below.
+            var service = new google.maps.places.PlacesService(map);
             service.textSearch(request, callback);
             console.log ("Request succeeded: " + callback);
-            // Previous location of createMarker().
       }
     }
   });
-}
+} // Close geoCoder()
 
-
+// Retrieve the results[i] from callback.
 function callback(results, status) {
   if (status == google.maps.places.PlacesServiceStatus.OK) {
     console.log(status);
     // Iterate through results from callback.
     for (var i=0; i<results.length; i++) {
-      // geoCoder();
       console.log("THIS IS A RESULT: ", results);
-      var location = {lat: results[i].geometry.location.lat(), lng: results[i].geometry.location.lng()}
-      // markerArr.push({lat: results[i].geometry.location.lat(), lng: results[i].geometry.location.lng()});
-      // console.log("Marker Array:", markerArr);
+      var resGeo = {lat: results[i].geometry.location.lat(), lng: results[i].geometry.location.lng()}
       resultCounter++;
-
-      // for (var j=0; j<markerArr.length; j++) {
-// This is createMarker(), using results[i] from callback().
-      var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center: location});
-      map.panTo(location); 
+      // Create marker.
+      var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center: resGeo});
+      map.panTo(resGeo);
 
       var marker = new google.maps.Marker({
-        position: location,
+        position: resGeo,
         map: map,
       });
-      // markerArray.push(marker);
+
       var infowindow = new google.maps.InfoWindow({
         content: '<a href="https://www.google.com/maps?q='+results[i].formatted_address+'" target="_blank"><p>'
         +results[i].name+'</p></a>'
@@ -166,9 +159,8 @@ function callback(results, status) {
       marker.addListener('click', function() {
         infowindow.open(map, marker);
       });
-    // } //for loop
 
-      // Append table structure.
+      // Append table.
       var tableHead = $("<th>");
       tableHead.attr("scope", "row");
       tableHead.attr("id", "result-"+resultCounter);
@@ -185,12 +177,10 @@ function callback(results, status) {
       if (pricing === undefined) {
         pricing = "Priceless.";
       }
-      // Format name href link joining and searching.
+      // Format name to one .concat() string.
       var formatName = formatQueryString(results[i].name);
-      // var formatAddress = formatQueryString(results[i].formatted_address); (No point, this can confuse the request.)
-      // Note to self: DO NOT USE results.photos.html_attributes for <a> linkage, it totally sucks.
-      // <a href="'+addshit+'" target="_blank"><h2></h2> </a>
-      // <a href="'+results.photos+'" target="_blank"><h2>'+results.place.name+'</h2></a>
+
+      // Append results[i] as table contents.
       $('#table > tbody')
         .append('<tr>'+tableHead+resultCounter+'</th><td><a href="https://www.google.com/maps?q='+formatName+'" target="_blank"><h2>'
         +results[i].name+'</h2></a></td><td><h4>'
@@ -198,7 +188,7 @@ function callback(results, status) {
         +pricing+'</h4></td><td><a href="https://www.google.com/maps?q='+formatName+'" target="_blank"><h4>'
         +results[i].formatted_address+'</h4></a></td></tr>');
 
-      var newSearch = {
+      var newData = {
         name: formatName,
         rating: someRating,
         pricing_level: pricing,
@@ -209,7 +199,7 @@ function callback(results, status) {
       };
     }//for loop
     //Push search results to Firebase
-    database.ref().push(newSearch);
+    database.ref().push(newData);
   } //if statement
   // accessFirebase();
 } // Close callback()
