@@ -204,7 +204,7 @@ function callback(results, status) {
   // accessFirebase();
 } // Close callback()
 
-// // Grab all the iterations out from Firebase to the last 10 objects.
+// Grab all the iterations out from Firebase to the last 10 objects.
 // function accessFirebase() {
 //   database.ref().limitToLast(10).on("child_added", function(snapshot) {
 //     // Signify database name.
