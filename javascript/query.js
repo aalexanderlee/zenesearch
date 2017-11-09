@@ -153,13 +153,15 @@ function callback(results, status) {
       //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
       var latLng = new google.maps.LatLng(results[i].geometry.location.lat(), results[i].geometry.location.lng());
-      // createMarker();
+
+      // This is createMarker()
       var marker = new google.maps.Marker({
         place: {placeId:results[i].place_id, //results[0].geometry.location,
         location: results[i].geometry.location
         },
         map: map,
       });
+
       // map.addTo(marker);
       var content = '<a href="https://www.google.com/maps?q='+results[i].formatted_address+'" target="_blank"><p>'+results[i].name+'</p></a>'
       var infowindow = new google.maps.InfoWindow({
@@ -185,11 +187,13 @@ function callback(results, status) {
       console.log(status);
       console.log(resultCounter);
       console.log(results);
+
       // If API returns undefined, notify there is no rating.
       var someRating = results[i].rating;
       if (someRating === undefined) {
         someRating = "Merrrp. No ratings here.";
       }
+
       // If API returns undefined, notify there is no price tier.
       var pricing = results[i].price_level;
       if (pricing === undefined) {
@@ -215,45 +219,16 @@ function callback(results, status) {
         formatted_address: results[i].formatted_address,
         dateAdded: firebase.database.ServerValue.TIMESTAMP,
       };
-    }//For loop
+    } //For loop
     //Push search results to Firebase
     database.ref().push(newData);
   } // Close if statement
-    // Call accessFirebase() to execute.;
 } // Close callback()
-
-// // Uncomment to grab all the iterations out from Firebase to the last 10 objects.
-// function accessFirebase() {
-//   clearMapDiv();
-//
-//   database.ref().limitToLast(10).on("child_added", function(snapshot) {
-//     // Signify database name.
-//     var sv = snapshot.val();
-//     var center = {lat: sv.latitude, lng: sv.longitude};
-//     console.log("THIS IS THE CENTER: ", center);
-//     console.log("Address: ", sv.formatted_address);
-//
-//     var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center: center});
-//     var marker = new google.maps.Marker({
-//       position: center,
-//       map: map,
-//     });
-//     map.panTo(center);
-//     var infowindow = new google.maps.InfoWindow({
-//       content: '<a href="https://www.google.com/maps?q='+sv.formatted_address+'" target="_blank"><p>'+sv.name+'</p></a>'
-//     })
-//     marker.addListener('click', function() {
-//       infowindow.open(marker.get(map), marker);
-//     })
-//   })
-//   // database.ref().remove()
-// }
 
 
 function getData() {
   clearMapDiv();
   geoCoder();
-  // callback();
 } // Close getData()
 
 
