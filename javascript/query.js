@@ -113,7 +113,7 @@ function geoCoder() {
             var userLocation = {lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng()};
             console.log("Location : ", userLocation);
             var location = userLocation;
-            initMap(location);
+            // initMap(location);
 
             // Generate the map for new location from user input
             var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center: location});
@@ -140,30 +140,42 @@ function geoCoder() {
 function callback(results, status) {
   if (status == google.maps.places.PlacesServiceStatus.OK) {
     console.log(status);
+    var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center: results[0].geometry.location});
+
     // Iterate through results from callback.
     for (var i=0; i < results.length; i++) {
       console.log("THIS IS A RESULT: ", results);
       var resGeo = {lat: results[i].geometry.location.lat(), lng: results[i].geometry.location.lng()};
       markerArr.push(resGeo);
       resultCounter++;
+      map.panTo(resGeo);
       // createMarkers();
 
       //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-      var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center: resGeo});
       // var latLng = new google.maps.LatLng(results[i].geometry.location.lat(), results[i].geometry.location.lng());
-      map.panTo(resGeo);
 
       var marker = new google.maps.Marker({
-        position:{lat: results[i].geometry.location.lat(), lng: results[i].geometry.location.lng()}, //results[0].geometry.location,
+        place: {placeId:results[i].place_id, //results[0].geometry.location,
+        location: results[i].geometry.location
+        },
         map: map,
       });
       // map.addTo(marker);
+      var content = '<a href="https://www.google.com/maps?q='+results[i].formatted_address+'" target="_blank"><p>'+results[i].name+'</p></a>'
       var infowindow = new google.maps.InfoWindow({
-        content: '<a href="https://www.google.com/maps?q='+results[i].formatted_address+'" target="_blank"><p>'+results[i].name+'</p></a>'
+        content: content
       });
       marker.addListener('click', function() {
         infowindow.open(map, this);
       });
+
+      google.maps.event.addListener(marker, 'click', (function(marker, content) {
+            return function() {
+                infowindow.setContent(content);
+                infowindow.open(map, marker);
+            }
+      })(marker, content));
+
       //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
       // Append table.
@@ -195,7 +207,7 @@ function callback(results, status) {
         +results[i].formatted_address+'</h4></a></td></tr>');
 
       var newData = {
-        name: formatName,
+        name: results[i].name,
         rating: someRating,
         pricing_level: pricing,
         latitude: results[i].geometry.location.lat(),
@@ -234,6 +246,8 @@ function callback(results, status) {
 
 // // Grab all the iterations out from Firebase to the last 10 objects.
 // function accessFirebase() {
+//   clearMapDiv();
+//
 //   database.ref().limitToLast(10).on("child_added", function(snapshot) {
 //     // Signify database name.
 //     var sv = snapshot.val();
@@ -247,19 +261,21 @@ function callback(results, status) {
 //       map: map,
 //     });
 //     map.panTo(center);
-//     var name = sv.name;
-//     var infowindow = new google.maps.InfoWindow({content: name})
+//     var infowindow = new google.maps.InfoWindow({
+//       content: '<a href="https://www.google.com/maps?q='+sv.formatted_address+'" target="_blank"><p>'+sv.name+'</p></a>'
+//     })
 //     marker.addListener('click', function() {
 //       infowindow.open(marker.get(map), marker);
 //     })
 //   })
+//   // database.ref().remove()
 // }
 
 
 function getData() {
   clearMapDiv();
   geoCoder();
-  callback();
+  // callback();
 } // Close getData()
 
 
