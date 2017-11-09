@@ -140,7 +140,7 @@ function geoCoder() {
 function callback(results, status) {
   if (status == google.maps.places.PlacesServiceStatus.OK) {
     console.log(status);
-    var map = new google.maps.Map(document.getElementById('map'), {zoom: 10, center: results[0].geometry.location});
+    var map = new google.maps.Map(document.getElementById('map'), {zoom: 11, center: results[0].geometry.location});
 
     // Iterate through results from callback.
     for (var i=0; i < results.length; i++) {
@@ -149,12 +149,11 @@ function callback(results, status) {
       markerArr.push(resGeo);
       resultCounter++;
       map.panTo(resGeo);
-      // createMarkers(results);
 
       //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
       var latLng = new google.maps.LatLng(results[i].geometry.location.lat(), results[i].geometry.location.lng());
-
+      // createMarker();
       var marker = new google.maps.Marker({
         place: {placeId:results[i].place_id, //results[0].geometry.location,
         location: results[i].geometry.location
@@ -222,31 +221,6 @@ function callback(results, status) {
   } // Close if statement
     // Call accessFirebase() to execute.;
 } // Close callback()
-
-// function createMarkers() {
-//   callback();
-//   var marker = new google.maps.Marker({
-//     place: {placeId:results[i].place_id, //results[0].geometry.location,
-//     location: results[i].geometry.location
-//     },
-//     map: map,
-//   });
-//   // map.addTo(marker);
-//   var content = '<a href="https://www.google.com/maps?q='+results[i].formatted_address+'" target="_blank"><p>'+results[i].name+'</p></a>'
-//   var infowindow = new google.maps.InfoWindow({
-//     content: content
-//   });
-//   marker.addListener('click', function() {
-//     infowindow.open(map, this);
-//   });
-//
-//   google.maps.event.addListener(marker, 'click', (function(marker, content) {
-//         return function() {
-//             infowindow.setContent(content);
-//             infowindow.open(map, marker);
-//         }
-//   })(marker, content));
-// }
 
 // // Uncomment to grab all the iterations out from Firebase to the last 10 objects.
 // function accessFirebase() {
