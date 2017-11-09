@@ -8,8 +8,8 @@ ZeneSearch => is a basic query search engine web application that allows users t
 ## Here is the Github deployment link:
 https://aalexanderlee.github.io/zenesearch/
 
-## Major Tools or Methods Used:
-Google GeoCoder, Places and Maps API services were use to translate place proximities from city name searches to {latitude, longitude} coordinate pairings most applicable to the user input search criteria. Google Firebase was use to store data from the user sessions. The Google API was also accessed for library font specific qualities. The Green Sock library was used to animate the title of this engine.   
+## Major Tools, Features or Methods Used:
+Google GeoCoder, Places and Maps API services were use to translate place proximities from city name searches to {latitude, longitude} coordinate pairings most applicable to the user input search criteria. Google Firebase was used to store data from the user sessions. The Google API was also accessed for library font specific qualities. The Green Sock library was used to animate the title of this engine. The map and initial central marker begins in Tokyo, JP, and pans elsewhere depending on the parameter specifications entered. All listed links and map markers will pull external data and open external searches using the user results.
 
 ## ZeneSearch Landing Page Images:
 * Page 1:
